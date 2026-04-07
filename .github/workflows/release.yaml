@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     tags:
-      - '*'
+      - "*"
   workflow_dispatch:
 
 jobs:
@@ -12,21 +12,21 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            label: 'windows'
-            artifact_name: 'FileHasher-Windows-x86_64.zip'
+            label: "windows"
+            artifact_name: "FileHasher-Windows-x86_64.zip"
           - os: macos-latest
-            label: 'macos-arm'
-            artifact_name: 'FileHasher_macOS_aarch64.zip'
+            label: "macos-arm"
+            artifact_name: "FileHasher_macOS_aarch64.zip"
           - os: macos-15-intel
-            label: 'macos-x86'
-            artifact_name: 'FileHasher_macOS_x86_64.zip'
+            label: "macos-x86"
+            artifact_name: "FileHasher_macOS_x86_64.zip"
 
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '>=1.26.0'
+          go-version: ">=1.26.0"
 
       # Windows用のビルド設定
       - name: Setup msys2
@@ -39,9 +39,9 @@ jobs:
       # 各OSでのビルド実行 (ファイル名はOSごとに分ける)
       - name: Build
         run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
+          go install fyne.io/tools/cmd/fyne@latest
           fyne package
-          
+
       - name: Packing application for Windows
         if: runner.os == 'Windows'
         run: zip -r ${{ matrix.artifact_name }} File\ Hasher.exe
