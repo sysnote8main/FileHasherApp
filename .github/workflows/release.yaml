@@ -17,7 +17,7 @@ jobs:
           - os: macos-latest
             label: 'macos-arm'
             artifact_name: 'FileHasher_macOS_aarch64.zip'
-          - os: macos-13
+          - os: macos-15-intel
             label: 'macos-x86'
             artifact_name: 'FileHasher_macOS_x86_64.zip'
 
@@ -38,15 +38,17 @@ jobs:
 
       # 各OSでのビルド実行 (ファイル名はOSごとに分ける)
       - name: Build
-        shell: runner.os == 'Windows'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
           fyne package
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            zip -r ${{ matrix.artifact_name }} File\ Hasher.exe
-          else
-            zip -r ${{ matrix.artifact_name }} ./File\ Hasher.app
-          fi
+          
+      - name: Packing application for Windows
+        if: runner.os == 'Windows'
+        run: zip -r ${{ matrix.artifact_name }} File\ Hasher.exe
+
+      - name: Packing application for non-Windows
+        if: runner.os != 'Windows'
+        run: zip -r ${{ matrix.artifact_name }} ./File\ Hasher.app
 
       # 成果物を一時保存 (次のジョブに渡すため)
       - name: Upload Artifact
