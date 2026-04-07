@@ -44,7 +44,7 @@ jobs:
 
       - name: Packing application for Windows
         if: runner.os == 'Windows'
-        run: zip -r ${{ matrix.artifact_name }} File\ Hasher.exe
+        run: Compress-Archive -Path "File Hasher.exe" -DestinationPath "${{ matrix.artifact_name }}"
 
       - name: Packing application for non-Windows
         if: runner.os != 'Windows'
