@@ -1,4 +1,4 @@
-name: Cross-Build Release (Matrix)
+name: Cross-Build Release (Universal)
 on:
   push:
     tags:
@@ -6,12 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  # --- 1. macOS向けビルドジョブ ---
+  # --- 1. macOS向けビルド (Universal Binary) ---
   build-macos:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        arch: [arm64, amd64]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -19,17 +16,36 @@ jobs:
           go-version: ">=1.26.0"
       - name: Install Fyne CLI
         run: go install fyne.io/tools/cmd/fyne@latest
-      - name: Build
+
+      - name: Build Universal macOS App
         run: |
-          GOARCH=${{ matrix.arch }} fyne package -os darwin
-          zip -r FileHasher_macOS_${{ matrix.arch }}.zip "File Hasher.app"
-      - name: Upload Artifact
+          # 1. ARM64向けビルド
+          GOARCH=arm64 fyne package -os darwin --executable FileHasher_arm64
+          mv "File Hasher.app/Contents/MacOS/FileHasher_arm64" ./FileHasher_arm64_bin
+          rm -rf "File Hasher.app"
+
+          # 2. AMD64向けビルド
+          GOARCH=amd64 fyne package -os darwin --executable FileHasher_amd64
+          # この時点で .app フォルダが再生成される
+          mv "File Hasher.app/Contents/MacOS/FileHasher_amd64" ./FileHasher_amd64_bin
+
+          # 3. lipoで結合してUniversalバイナリを作成
+          lipo -create -output "File Hasher.app/Contents/MacOS/File Hasher" ./FileHasher_arm64_bin ./FileHasher_amd64_bin
+
+          # 不要な個別バイナリを削除
+          rm "File Hasher.app/Contents/MacOS/FileHasher_amd64"
+          rm ./FileHasher_arm64_bin ./FileHasher_amd64_bin
+
+          # 4. ZIP化
+          zip -r FileHasher_macOS_universal.zip "File Hasher.app"
+
+      - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-${{ matrix.arch }}
-          path: FileHasher_macOS_${{ matrix.arch}}.zip
+          name: macos-universal
+          path: FileHasher_macOS_universal.zip
 
-  # --- 2. Windows向けビルドジョブ ---
+  # --- 2. Windows向けビルド ---
   build-windows:
     runs-on: windows-latest
     steps:
@@ -40,13 +56,14 @@ jobs:
       - name: Install Fyne CLI
         run: go install fyne.io/tools/cmd/fyne@latest
       - name: Build
+        shell: pwsh
         run: |
           fyne package -os windows
           Compress-Archive -Path "File Hasher.exe" -DestinationPath "FileHasher-Windows-x86_64.zip"
-      - name: Upload Artifact
+      - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-x64
+          name: windows-artifact
           path: FileHasher-Windows-x86_64.zip
 
   # --- 3. リリースジョブ ---
@@ -61,7 +78,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-          merge-multiple: true # 全てのファイルを一つのディレクトリに集める
+          merge-multiple: true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
