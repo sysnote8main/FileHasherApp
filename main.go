@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log/slog"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 )
@@ -8,6 +10,7 @@ import (
 var App fyne.App
 
 func main() {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	App = app.New()
 	InitUI()
 	App.Run()

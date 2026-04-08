@@ -1,12 +1,15 @@
 package main
 
 import (
+	"crypto/sha256"
+	"hash"
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"image/color"
 )
 
 var W fyne.Window
@@ -31,6 +34,8 @@ var SHA256Hash *widget.RichText
 var CopyMD5Button *widget.Button
 var CopySHA1Button *widget.Button
 var CopySHA256Button *widget.Button
+
+var sha256Hasher *Hasher
 
 func (entry *EntryWithEnterKeyEvent) KeyDown(key *fyne.KeyEvent) {
 	if fyne.KeyReturn == key.Name {
@@ -100,6 +105,9 @@ func InitUI() {
 		W.Clipboard().SetContent(SHA256Hash.String())
 	})
 	CopySHA256Button.Hide()
+
+	sha256Hasher = NewHasher("SHA-256", func() hash.Hash { return sha256.New() })
+
 	hashVbox := container.NewVBox(
 		container.NewBorder(nil, nil,
 			container.NewGridWrap(fyne.Size{
@@ -121,7 +129,8 @@ func InitUI() {
 				Height: SHA256Check.MinSize().Height,
 			}, SHA256Check),
 			container.NewHBox(CopySHA256Button, spacer),
-			SHA256ProgressBar, SHA256Hash))
+			SHA256ProgressBar, SHA256Hash),
+		sha256Hasher.GetContainer())
 
 	W.SetContent(container.NewVBox(
 		fileHbox,
