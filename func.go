@@ -39,12 +39,12 @@ func HashFile() {
 		return
 	}
 
-	slog.Info("Hash starting...")
+	slog.Debug("Hash starting...")
 	var wg sync.WaitGroup
 	wg.Go(func() { md5Hasher.DoHashing(FileEntry.Text) })
 	wg.Go(func() { sha1Hasher.DoHashing(FileEntry.Text) })
 	wg.Go(func() { sha256Hasher.DoHashing(FileEntry.Text) })
-	slog.Info("Waiting....")
+	slog.Debug("Waiting....")
 	wg.Wait()
 }
 
