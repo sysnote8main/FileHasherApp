@@ -1,11 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"hash"
 	"image/color"
 	"io"
+	"log/slog"
 	"os"
 
 	"fyne.io/fyne/v2"
@@ -56,7 +56,7 @@ func NewHasher(name string, hash func() hash.Hash) *Hasher {
 	hasher.hashText = widget.NewRichText()
 
 	hasher.copy = widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
-		App.Clipboard().SetContent(MD5Hash.String())
+		App.Clipboard().SetContent(hasher.hashText.String())
 	})
 	hasher.copy.Hide()
 
@@ -76,13 +76,13 @@ func (h *Hasher) GetContainer() *fyne.Container {
 	return h.container
 }
 
-func (h *Hasher) DoHashing(file string) error {
+func (h *Hasher) DoHashing(file string) {
 	fyne.Do(func() {
 		h.hashText.ParseMarkdown("")
 	})
 
 	if !h.Enabled {
-		return nil
+		return
 	}
 
 	fyne.Do(func() {
@@ -94,27 +94,37 @@ func (h *Hasher) DoHashing(file string) error {
 		})
 	}()
 
-	h.copy.Hide()
+	fyne.Do(func() {
+		h.copy.Hide()
+	})
 
 	f, err := os.Open(file)
 	if err != nil {
-		return errors.Join(fmt.Errorf("Failed to open"), err)
+		slog.Error("Failed to open", slog.Any("error", err))
+		return
 	}
 	defer f.Close()
 
 	hashCalc := h.Hash()
-	h.progressbar.Show()
+	fyne.Do(func() {
+		h.progressbar.Show()
+	})
+
 	if _, err := io.Copy(hashCalc, f); err != nil {
-		return errors.Join(fmt.Errorf("Failed to copy file content"), err)
+		slog.Error("Failed to copy file content", slog.Any("error", err))
+		return
 	}
-	h.progressbar.Hide()
+
+	fyne.Do(func() {
+		h.progressbar.Hide()
+	})
 
 	hashStr := fmt.Sprintf("`%x`", hashCalc.Sum(nil))
 	fyne.Do(func() {
 		h.hashText.ParseMarkdown(hashStr)
 	})
 
-	h.copy.Show()
-
-	return nil
+	fyne.Do(func() {
+		h.copy.Show()
+	})
 }
