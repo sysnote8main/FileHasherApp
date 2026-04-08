@@ -1,9 +1,7 @@
-package main
+package cmd
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"sync"
@@ -46,18 +44,4 @@ func HashFile() {
 	wg.Go(func() { sha256Hasher.DoHashing(FileEntry.Text) })
 	slog.Debug("Waiting....")
 	wg.Wait()
-}
-
-func readFile(file string, writer io.Writer) error {
-	f, err := os.Open(file)
-	if err != nil {
-		return errors.Join(fmt.Errorf("Failed to open"), err)
-	}
-	defer f.Close()
-
-	if _, err := io.Copy(writer, f); err != nil {
-		return errors.Join(fmt.Errorf("Failed to copy file content"), err)
-	}
-
-	return nil
 }

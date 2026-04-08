@@ -1,15 +1,10 @@
 package main
 
 import (
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
+	"filehasher/cmd"
 )
-
-var App fyne.App
 
 func main() {
 	// slog.SetLogLoggerLevel(slog.LevelDebug)
-	App = app.New()
-	InitUI()
-	App.Run()
+	cmd.Run()
 }

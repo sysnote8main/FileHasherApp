@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"crypto/md5"
@@ -8,12 +8,14 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
+var App fyne.App
 var W fyne.Window
 
 type EntryWithEnterKeyEvent struct{ widget.Entry }
@@ -30,6 +32,12 @@ func (entry *EntryWithEnterKeyEvent) KeyDown(key *fyne.KeyEvent) {
 	if fyne.KeyReturn == key.Name {
 		HashFile()
 	}
+}
+
+func Run() {
+	App = app.New()
+	InitUI()
+	App.Run()
 }
 
 func InitUI() {
