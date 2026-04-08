@@ -31,13 +31,19 @@ jobs:
           zip -r FileHasher_macOS_amd64.zip "File Hasher.app"
           rm -rf "File Hasher.app"
 
-      # Artifactとして保存（ビルド成果物のバックアップ）
       - name: Upload Artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: macos-binaries
+          name: macos-arm
           path: |
             FileHasher_macOS_arm64.zip
+          retention-days: 7
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: macos-amd
+          path: |
             FileHasher_macOS_amd64.zip
           retention-days: 7
 
