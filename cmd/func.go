@@ -38,9 +38,11 @@ func HashFile() {
 
 	slog.Debug("Hash starting...")
 	var wg sync.WaitGroup
-	wg.Go(func() { md5Hasher.DoHashing(FileEntry.Text) })
-	wg.Go(func() { sha1Hasher.DoHashing(FileEntry.Text) })
-	wg.Go(func() { sha256Hasher.DoHashing(FileEntry.Text) })
+	for _, hasher := range hashers {
+		wg.Go(func() {
+			hasher.DoHashing(FileEntry.Text)
+		})
+	}
 	slog.Debug("Waiting....")
 	wg.Wait()
 }

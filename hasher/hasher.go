@@ -1,4 +1,4 @@
-package cmd
+package hasher
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ type Hasher struct {
 	copy        *widget.Button
 }
 
-func NewHasher(name string, hash func() hash.Hash) *Hasher {
+func NewHasher(name string, hash func() hash.Hash, clipboardSetter func(text string)) *Hasher {
 	hasher := &Hasher{
 		Name:    name,
 		Enabled: true,
@@ -56,7 +56,7 @@ func NewHasher(name string, hash func() hash.Hash) *Hasher {
 	hasher.hashText = widget.NewRichText()
 
 	hasher.copy = widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
-		App.Clipboard().SetContent(hasher.hashText.String())
+		clipboardSetter(hasher.hashText.String())
 	})
 	hasher.copy.Hide()
 

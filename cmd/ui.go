@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
+	"filehasher/hasher"
 	"hash"
 	"image/color"
 
@@ -24,9 +25,7 @@ var FileOpenButton *widget.Button
 var FileEntry *EntryWithEnterKeyEvent
 var FileHashButton *widget.Button
 
-var md5Hasher *Hasher
-var sha1Hasher *Hasher
-var sha256Hasher *Hasher
+var hashers = make([]*hasher.Hasher, 0, 10)
 
 func (entry *EntryWithEnterKeyEvent) KeyDown(key *fyne.KeyEvent) {
 	if fyne.KeyReturn == key.Name {
@@ -60,14 +59,23 @@ func InitUI() {
 		FileEntry,
 	)
 
-	md5Hasher = NewHasher("MD5", func() hash.Hash { return md5.New() })
-	sha1Hasher = NewHasher("SHA-1", func() hash.Hash { return sha1.New() })
-	sha256Hasher = NewHasher("SHA-256", func() hash.Hash { return sha256.New() })
+	clipSetter := func(text string) {
+		App.Clipboard().SetContent(text)
+	}
+
+	hashers = append(hashers,
+		hasher.NewHasher("MD5", func() hash.Hash { return md5.New() }, clipSetter),
+		hasher.NewHasher("SHA-1", func() hash.Hash { return sha1.New() }, clipSetter),
+		hasher.NewHasher("SHA-256", func() hash.Hash { return sha256.New() }, clipSetter),
+	)
+
+	containers := make([]fyne.CanvasObject, 0, 10)
+	for _, hasher := range hashers {
+		containers = append(containers, hasher.GetContainer())
+	}
 
 	hashVbox := container.NewVBox(
-		md5Hasher.GetContainer(),
-		sha1Hasher.GetContainer(),
-		sha256Hasher.GetContainer(),
+		containers...,
 	)
 
 	W.SetContent(container.NewVBox(
