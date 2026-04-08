@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
+	"crypto"
 	"filehasher/hasher"
 	"hash"
 	"image/color"
@@ -64,9 +62,12 @@ func InitUI() {
 	}
 
 	hashers = append(hashers,
-		hasher.NewHasher("MD5", func() hash.Hash { return md5.New() }, clipSetter),
-		hasher.NewHasher("SHA-1", func() hash.Hash { return sha1.New() }, clipSetter),
-		hasher.NewHasher("SHA-256", func() hash.Hash { return sha256.New() }, clipSetter),
+		hasher.NewHasherDisabled("MD4", func() hash.Hash { return crypto.MD4.New() }, clipSetter),
+		hasher.NewHasherEnabled("MD5", func() hash.Hash { return crypto.MD5.New() }, clipSetter),
+		hasher.NewHasherEnabled("SHA-1", func() hash.Hash { return crypto.SHA1.New() }, clipSetter),
+		hasher.NewHasherEnabled("SHA-256", func() hash.Hash { return crypto.SHA256.New() }, clipSetter),
+		hasher.NewHasherDisabled("SHA-512", func() hash.Hash { return crypto.SHA512.New() }, clipSetter),
+		hasher.NewHasherDisabled("RIPEMD-160", func() hash.Hash { return crypto.RIPEMD160.New() }, clipSetter),
 	)
 
 	containers := make([]fyne.CanvasObject, 0, 10)

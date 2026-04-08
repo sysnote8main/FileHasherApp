@@ -35,10 +35,18 @@ type Hasher struct {
 	copy        *widget.Button
 }
 
-func NewHasher(name string, hash func() hash.Hash, clipboardSetter func(text string)) *Hasher {
+func NewHasherEnabled(name string, hash func() hash.Hash, clipboardSetter func(text string)) *Hasher {
+	return NewHasher(name, true, hash, clipboardSetter)
+}
+
+func NewHasherDisabled(name string, hash func() hash.Hash, clipboardSetter func(text string)) *Hasher {
+	return NewHasher(name, false, hash, clipboardSetter)
+}
+
+func NewHasher(name string, enabled bool, hash func() hash.Hash, clipboardSetter func(text string)) *Hasher {
 	hasher := &Hasher{
 		Name:    name,
-		Enabled: true,
+		Enabled: enabled,
 		Hash:    hash,
 	}
 
