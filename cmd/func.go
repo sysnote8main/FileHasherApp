@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"sync"
@@ -33,7 +32,7 @@ func HashFile() {
 	}()
 	_, err := os.Stat(FileEntry.Text)
 	if err != nil {
-		nativeDialog.Message(fmt.Sprintf("%v", err)).Error()
+		nativeDialog.Message("%v", err).Error()
 		return
 	}
 
